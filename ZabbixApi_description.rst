@@ -10,10 +10,11 @@ ___________________
 1. 实例化类
    zabbix = ZabbixApi()
 
-2. 调用相应方法
-   列出所有事件:
+2. 调用相应方法:
 
 ::
+
+   列出所有事件:
 
     from ZabbixApi import ZabbixApi
 
@@ -54,15 +55,21 @@ ____________________
 
 * set_host_status(hostname, status=1)
 
+::
+
   设置某台主机是否被监控
   参数：status 0：监控 1：不监控(此函数参数默认为不监控，因为主机加入zabbix server的时候，默认是监控状态)
 
 * event_ack(eventid)
 
+::
+
   对某事件进行确认
   参数：eventid
 
 * get_cpu(hostname, time_from=None, time_to=None)
+
+::
 
   获取某台主机的CPU的负载
   time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
@@ -74,17 +81,23 @@ ____________________
 
 * get_memory(hostname, time_from=None, time_to=None)
 
+::
+
   获取某台主机的可用内存
   time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
   返回值同get_cpu()
 
 * get_network_traffic_in(hostname, time_from=None, time_to=None)
 
+::
+
   获取某台主机的入口流量(目前只检测eth0)
   time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
   返回值同get_cpu()
 
 * get_network_traffic_out(hostname, time_from=None, time_to=None)
+
+::
 
   获取某台主机的出口流量(目前只检测eth0)
   time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
