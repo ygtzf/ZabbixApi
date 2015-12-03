@@ -35,6 +35,8 @@ ____________________
 
 * get_event(hostname=None, time_from=None, time_to=None)
 
+::
+
   hostname,time_from,time_to都为空时，列出所有host，所有时间的事件(具体能保存多长时间的事件还不太清楚);
   hostname参数为空时，输出某一时间段的所有host的事件;
   time_from,time_to为空时，列出某个host上的所有事件;
