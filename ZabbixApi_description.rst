@@ -130,6 +130,7 @@ ____________________
 * update_trigger(triggerid, **expression_kwargs)
 
 ::
+
   更新某个trigger
   参数需要triggerid和表达式，表达式同create_trigger中的参数expression
   返回值：
