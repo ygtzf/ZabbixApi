@@ -17,8 +17,8 @@ ___________________
    列出所有事件:
 
     from ZabbixApi import ZabbixApi
-
-    zabbix = ZabbixApi()
+    url = http://10.6.14.212/zabbix
+    zabbix = ZabbixApi(url, user="admin", password="zabbix")
 
     time_from = "2015-11-25 17:00:00"
     time_to = "2015-12-02 00:00:00"
@@ -102,3 +102,63 @@ ____________________
   获取某台主机的出口流量(目前只检测eth0)
   time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
   返回值同get_cpu()
+
+* create_trigger(trigger_name, severity, **expression_kwargs)
+
+::
+
+  创建一个trigger
+  trigger_name: 自定义trigger的名称
+  severity: trigger的严重级别，包括以下值：
+    0 - (default) not classified;
+    1 - information;
+    2 - warning;
+    3 - average;
+    4 - high;
+    5 - disaster
+  expression_kwargs: 表达式的字典,有以下key：
+    "hostname"
+    "function_name": 函数名称（last、avg、diff、nodata）
+    "item_key":  从get_items接口的返回值中取的。
+    "param":  时间值，作为function的参数
+    "operator":  比较符（>/</=/#(不等于)）
+    "threshold": 阈值
+  返回值：
+  返回triggerid
+
+
+* update_trigger(triggerid, **expression_kwargs)
+
+::
+  更新某个trigger
+  参数需要triggerid和表达式，表达式同create_trigger中的参数expression
+  返回值：
+  返回triggerid
+
+* list_trigger(hostname)
+
+::
+
+  获取某台主机的trigger列表
+  返回值:
+  返回列表，列表的每个元素是字典，字典包含如下key：
+  "function" : 函数名
+  "name" : trigger 名称
+  "enabled" : trigger状态（bool值）
+  "triggerid" : triggerid
+  "threshold" : 阈值
+  "time_param" : function函数的参数
+  "item_key" : item key
+  "host" : hostname
+  "severity" : 严重级别
+
+* list_items(hostname)
+
+::
+
+  获取某台主机上的item列表
+  返回值：
+  "itemid" : itemid
+  "units" : 单位
+  "key_" : item key (这个将在创建triiger的时候用到)
+  "name" : item 名称
