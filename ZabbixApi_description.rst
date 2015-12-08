@@ -17,15 +17,19 @@ ___________________
    列出所有事件:
 
     from ZabbixApi import ZabbixApi
-    url = http://10.6.14.212/zabbix
-    zabbix = ZabbixApi(url, user="admin", password="zabbix")
+    ip = "10.6.14.212"
+    zabbix = ZabbixApi(ip=ip, user="admin", password="zabbix")
 
     time_from = "2015-11-25 17:00:00"
     time_to = "2015-12-02 00:00:00"
 
-    eventlist = zabbix.get_event(hostname="ubuntu-zabbix-test", time_from=time_from, time_to=time_to)
-    for value in eventlist:
+    ret = zabbix.get_events(hostname="ubuntu-zabbix-test", time_from=time_from, time_to=time_to)
+
+    if ret['successed']:
+    for value in ret['result']:
     print value
+    else:
+    print ret['error']
 
     结果：
     {'eventid': u'551', 'status': 'OK', 'hostid': u'10139', 'severity': 'WARNING', 'ack': 'NO', 'duration': 174390.0362920761, 'host': u'ubuntu-zabbix-test', 'time': '2015-12-01 15:59:33', 'desc': u'Free disk space is less than 20% on volume /'}
@@ -33,8 +37,27 @@ ___________________
 
 接口说明
 ____________________
+1. 所有函数的返回值格式一致：
+   返回值都是字典，字典包括两个key:
+   1. "successed": "successed"是bool值，表示请求是否成功；
+         如果"successed"值为1，另一个key是"result"：获取到的结果的列表
+         如果"successed"值为0，另一个key是"error"; 是一些错误的信息
 
-* get_event(hostname=None, time_from=None, time_to=None)
+
+* set_host_status(hostname, status=1)
+
+::
+
+  设置某台主机是否被监控
+  参数：status 0：监控 1：不监控(此函数参数默认为不监控，因为主机加入zabbix server的时候，默认是监控状态)
+
+* event_ack(eventid)
+
+::
+
+  确认某事件
+
+* get_events(hostname=None, time_from=None, time_to=None)
 
 ::
 
@@ -42,7 +65,7 @@ ____________________
   hostname参数为空时，输出某一时间段的所有host的事件;
   time_from,time_to为空时，列出某个host上的所有事件;
   返回值：
-  返回列表，列表的每个元素是字典，字典包含如下key：
+  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
   eventid: 事件ID
   status： 事件的状态（OK/Problem)
   severity: 严重级别（Information/Warning/Average/High）
@@ -74,7 +97,7 @@ ____________________
   获取某台主机的CPU的负载
   time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
   返回值：
-  返回列表，列表的每个元素是字典，字典包含如下key：
+  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
   unit: 单位
   value: 监控数据
   time: 监控数据获取到的时间点
@@ -103,7 +126,7 @@ ____________________
   time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
   返回值同get_cpu()
 
-* create_trigger(trigger_name, severity, **expression_kwargs)
+* create_trigger(trigger_name, severity, expression)
 
 ::
 
@@ -116,33 +139,29 @@ ____________________
     3 - average;
     4 - high;
     5 - disaster
-  expression_kwargs: 表达式的字典,有以下key：
-    "hostname"
-    "function_name": 函数名称（last、avg、diff、nodata）
-    "item_key":  从get_items接口的返回值中取的。
-    "param":  时间值，作为function的参数
-    "operator":  比较符（>/</=/#(不等于)）
-    "threshold": 阈值
+  expression: trigger表达式
   返回值：
-  返回triggerid
+  如果成功，"result"的value是字典，字典有一个key："triggerids",它是一个triggerid
+  列表
 
 
-* update_trigger(triggerid, **expression_kwargs)
+* update_trigger(triggerid, expression)
 
 ::
 
   更新某个trigger
   参数需要triggerid和表达式，表达式同create_trigger中的参数expression
   返回值：
-  返回triggerid
+  如果成功，"result"的value是字典，字典有一个key："triggerids",它是一个triggerid
+  列表
 
-* list_trigger(hostname)
+* list_triggers(hostname)
 
 ::
 
   获取某台主机的trigger列表
   返回值:
-  返回列表，列表的每个元素是字典，字典包含如下key：
+  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
   "function" : 函数名
   "name" : trigger 名称
   "enabled" : trigger状态（bool值）
@@ -159,7 +178,17 @@ ____________________
 
   获取某台主机上的item列表
   返回值：
+  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
   "itemid" : itemid
   "units" : 单位
   "key_" : item key (这个将在创建triiger的时候用到)
   "name" : item 名称
+
+* get_hosts()
+
+::
+
+  获取host列表
+  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
+  "name" : hostname
+  "hostid" : 
