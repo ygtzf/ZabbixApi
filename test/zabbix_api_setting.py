@@ -1,0 +1,3 @@
+ZABBIX_SERVER_IP = "10.6.14.212"
+ZABBIX_USER = "admin"
+ZABBIX_PASSWORD = "zabbix"
