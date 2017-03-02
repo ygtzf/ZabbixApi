@@ -25,8 +25,8 @@ ___________________
 
     ret = zabbix.get_events(hostname="ubuntu-zabbix-test", time_from=time_from, time_to=time_to)
 
-    if ret['successed']:
-    for value in ret['result']:
+    if ret['success']:
+    for value in ret['results']:
     print value
     else:
     print ret['error']
@@ -39,9 +39,9 @@ ___________________
 ____________________
 1. 所有函数的返回值格式一致：
    返回值都是字典，字典包括两个key:
-   1. "successed": "successed"是bool值，表示请求是否成功；
-         如果"successed"值为1，另一个key是"result"：获取到的结果的列表
-         如果"successed"值为0，另一个key是"error"; 是一些错误的信息
+   1. "success": "success"是bool值，表示请求是否成功；
+         如果"success"值为1，另一个key是"results"：获取到的结果的列表
+         如果"success"值为0，另一个key是"error"; 是一些错误的信息
 
 
 * set_host_status(hostname, status=1)
@@ -65,7 +65,7 @@ ____________________
   hostname参数为空时，输出某一时间段的所有host的事件;
   time_from,time_to为空时，列出某个host上的所有事件;
   返回值：
-  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
+  如果成功，"results"的value是列表，列表的每个元素是字典，字典包含如下key：
   eventid: 事件ID
   status： 事件的状态（OK/Problem)
   severity: 严重级别（Information/Warning/Average/High）
@@ -90,41 +90,17 @@ ____________________
   对某事件进行确认
   参数：eventid
 
-* get_cpu(hostname, time_from=None, time_to=None)
+* get_item_data(hostname, itemid, time_from=None, time_to=None)
 
 ::
 
-  获取某台主机的CPU的负载
+  获取某台主机的性能监控数据
   time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
   返回值：
-  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
+  如果成功，"results"的value是列表，列表的每个元素是字典，字典包含如下key：
   unit: 单位
   value: 监控数据
   time: 监控数据获取到的时间点
-
-* get_memory(hostname, time_from=None, time_to=None)
-
-::
-
-  获取某台主机的可用内存
-  time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
-  返回值同get_cpu()
-
-* get_network_traffic_in(hostname, time_from=None, time_to=None)
-
-::
-
-  获取某台主机的入口流量(目前只检测eth0)
-  time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
-  返回值同get_cpu()
-
-* get_network_traffic_out(hostname, time_from=None, time_to=None)
-
-::
-
-  获取某台主机的出口流量(目前只检测eth0)
-  time_from,time_to为空时，返回7天内的历史数据(历史数据默认保存90天)
-  返回值同get_cpu()
 
 * create_trigger(trigger_name, severity, expression)
 
@@ -141,18 +117,18 @@ ____________________
     5 - disaster
   expression: trigger表达式
   返回值：
-  如果成功，"result"的value是字典，字典有一个key："triggerids",它是一个triggerid
+  如果成功，"results"的value是字典，字典有一个key："triggerids",它是一个triggerid
   列表
 
 
-* update_trigger(triggerid, expression)
+* update_trigger(self, triggerid, expression=None, trigger_name=None, severity=None)
 
 ::
 
   更新某个trigger
-  参数需要triggerid和表达式，表达式同create_trigger中的参数expression
+  参数需要triggerid,其余参数同create_trigger中的参数
   返回值：
-  如果成功，"result"的value是字典，字典有一个key："triggerids",它是一个triggerid
+  如果成功，"results"的value是字典，字典有一个key："triggerids",它是一个triggerid
   列表
 
 * list_triggers(hostname)
@@ -161,7 +137,7 @@ ____________________
 
   获取某台主机的trigger列表
   返回值:
-  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
+  如果成功，"results"的value是列表，列表的每个元素是字典，字典包含如下key：
   "function" : 函数名
   "name" : trigger 名称
   "enabled" : trigger状态（bool值）
@@ -171,24 +147,45 @@ ____________________
   "item_key" : item key
   "host" : hostname
   "severity" : 严重级别
+  "operator" : 比较操作符
 
-* list_items(hostname)
+* list_items(hostname=None, templatename=None)
 
 ::
 
-  获取某台主机上的item列表
+  获取某台主机上的item列表,可以根据hostname，也可以根据模板名字
   返回值：
-  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
+  如果成功，"results"的value是列表，列表的每个元素是字典，字典包含如下key：
   "itemid" : itemid
   "units" : 单位
   "key_" : item key (这个将在创建triiger的时候用到)
   "name" : item 名称
+  "value_type" : 监控数据的数据类型
 
 * get_hosts()
 
 ::
 
   获取host列表
-  如果成功，"result"的value是列表，列表的每个元素是字典，字典包含如下key：
+  如果成功，"results"的value是列表，列表的每个元素是字典，字典包含如下key：
   "name" : hostname
-  "hostid" : 
+  "hostid" :
+
+* enable_trigger(triggerid)
+
+::
+
+  Enable某个trigger
+
+* disable_trigger(triggerid)
+
+::
+
+  Disable某个trigger
+
+* delete_trigger(triggerids)
+
+::
+
+  删除trigger，可以删除一个，也可以删除多个
+  参数 triggerids是一个包含triggerid的列表
